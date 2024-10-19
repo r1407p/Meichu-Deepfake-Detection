@@ -23,11 +23,14 @@ app.add_middleware(
 # Define a Pydantic model to handle the expected request body
 class ImageCheckRequest(BaseModel):
     imageUrls: List[str]
-    videoUrls: List[str]
-    
-class ImageCheckRequest(BaseModel):
-    imageUrls: List[str]
 
+class AudioCheckRequest(BaseModel):
+    audioUrls: List[str]
+
+class TextSummaryRequest(BaseModel):
+    text: str
+    
+    
 async def check_image(url):
     try:
         # get the image result from gpu:
@@ -52,17 +55,18 @@ async def check_images(request: ImageCheckRequest):
                 ai_probability = await check_image(url)
                 if ai_probability > 0.5:
                     distribution["ai"] += 1
-                    res.append({"isAIgenerated": True})
+                    res.append({"isAIgenerated_prob": ai_probability, "isAIgenerated": True})
                 elif ai_probability > 0.3:
                     distribution["likely-ai"] += 1
-                    res.append({"isAIgenerated": False})
+                    res.append({"isAIgenerated_prob": ai_probability, "isAIgenerated": False})
                 else:
                     distribution["non-ai"] += 1
-                    res.append({"isAIgenerated": False})
+                    res.append({"isAIgenerated_prob": ai_probability, "isAIgenerated": False})
 
             except Exception as e:
                 logging.error(f"Failed to check image: {str(e)}")
-                res.append({"isAIgenerated": False})
+                res.append({"isAIgenerated_prob": 0, "isAIgenerated": False})
+
         ai_distribution = {
             "ai": distribution["ai"] / len(request.imageUrls),
             "likely-ai": distribution["likely-ai"] / len(request.imageUrls),
@@ -75,6 +79,36 @@ async def check_images(request: ImageCheckRequest):
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
+
+async def check_audio(url):
+    try:
+        # get the audio result from gpu:
+        result = random.random()
+        return result
+    except Exception as e:
+        logging.error(f"Failed to check audio: {str(e)}")
+        return 0
+    
+@app.post("/check_audios")
+async def check_audios(request: ImageCheckRequest):
+    try:
+        print(request.audioUrls)
+        res = []
+        for url in request.audioUrls:
+            try:
+                ai_probability = await check_image(url)
+                res.append(ai_probability)
+
+            except Exception as e:
+                logging.error(f"Failed to check audio: {str(e)}")
+                res.append({"isAIgenerated": False})
+        audio_ai_percentage = sum(res) / len(res)
+        return JSONResponse(content={
+            "audio_ai": res,
+            "audio_ai_percentage": audio_ai_percentage
+        }, status_code=200)
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 @app.post("/check")
 async def check_image(request: ImageCheckRequest):
