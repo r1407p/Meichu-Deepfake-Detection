@@ -1,12 +1,14 @@
-let analysisData = { histogram: [0, 0, 0], donut: [0, 0] };
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'imageAnalysisData') {
-        analysisData = message.data;
-        console.log('received data:', analysisData);
-    } else if (message.type === 'getAnalysisData') {
-        console.log('send data:', analysisData);
-        sendResponse(analysisData);
+        console.log('Received analysis data in background:', message.data);
+
+        // 可選: 將數據存儲在 chrome.storage.local 中
+        chrome.storage.local.set({ analysisData: message.data }, () => {
+            console.log('Analysis data saved to local storage');
+        });
+        
+        sendResponse({ status: 'success' });
     }
-    return true; 
+
 });
