@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
 import uvicorn
-
+from typing import List
 app = FastAPI()
 
 # Add CORS middleware to handle OPTIONS requests
@@ -18,20 +18,35 @@ app.add_middleware(
 
 # Define a Pydantic model to handle the expected request body
 class ImageCheckRequest(BaseModel):
-    imageUrl: str
+    imageUrls: List[str]
+    videoUrls: List[str]
 
 @app.post("/check")
 async def check_image(request: ImageCheckRequest):
     try:
-        print(request.imageUrl)
-        response = requests.get(request.imageUrl)
-        if response.status_code == 200:
-            content_type = response.headers['Content-Type']
-            print(content_type)
-            if content_type.startswith('image/'):
-                return JSONResponse(content={"isAIgenerated": True}, status_code=200)
-            else:
-                return JSONResponse(content={"error": "The URL does not point to an image"}, status_code=400)
+        print(request.imageUrls)
+        res = []
+        for url in request.imageUrls:
+            # response = requests.get(url)
+            if True:
+                res.append({"isAIgenerated": True})
+                continue
+                content_type = response.headers['Content-Type']
+                if content_type.startswith('image/'):
+                    res.append({"isAIgenerated": True})
+                else:
+                    res.append({"isAIgenerated": False})
+        for url in request.videoUrls:
+            print(url)
+        if True:
+            return JSONResponse(content={
+                "data":res,                                     
+                "histogramData": [30, 45, 25],
+                "donutData": {
+                "aiPercentage": 40,
+                "nonAiPercentage": 60
+            }}, status_code=200)
+
         else:
             return JSONResponse(content={"error": "Failed to download the image"}, status_code=400)
     except Exception as e:
