@@ -9,7 +9,9 @@ from typing import List
 import logging
 from openai import OpenAI
 import os
-
+import dotenv
+dotenv.load_dotenv()
+print(os.getenv("OPENAI_API_KEY"))
 app = FastAPI()
 
 # Add CORS middleware to handle OPTIONS requests
@@ -33,7 +35,7 @@ class AudioCheckRequest(BaseModel):
     audioUrls: List[str]
 
 class TextSummaryRequest(BaseModel):
-    text: str
+    texts: List[str]
     
     
 async def check_image(url):
@@ -58,6 +60,7 @@ async def check_images(request: ImageCheckRequest):
         for url in request.imageUrls:
             try:
                 ai_probability = await check_image(url)
+                ai_probability = random.random()
                 if ai_probability > 0.5:
                     distribution["ai"] += 1
                     res.append({"isAIgenerated_prob": ai_probability, "isAIgenerated": True})
@@ -94,19 +97,23 @@ async def check_audio(url):
         return 0
     
 @app.post("/check_audios")
-async def check_audios(request: ImageCheckRequest):
+async def check_audios(request: AudioCheckRequest):
     try:
         print(request.audioUrls)
         res = []
         for url in request.audioUrls:
             try:
-                ai_probability = await check_image(url)
+                # ai_probability = await check_image(url)
+                ai_probability = random.random()
                 res.append(ai_probability)
 
             except Exception as e:
                 logging.error(f"Failed to check audio: {str(e)}")
                 res.append({"isAIgenerated": False})
-        audio_ai_percentage = sum(res) / len(res)
+        if len(res) == 0:
+            audio_ai_percentage = 0
+        else:
+            audio_ai_percentage = sum(res) / len(res)
         return JSONResponse(content={
             "audio_ai": res,
             "audio_ai_percentage": audio_ai_percentage
@@ -115,6 +122,14 @@ async def check_audios(request: ImageCheckRequest):
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 async def summarize_text(text):
+    return text
+    
+
+@app.post("/summary_text")
+async def summary_text(request: TextSummaryRequest):
+    text = " ".join(request.texts)
+    return text
+    print(text)
     client = OpenAI(
         api_key=os.getenv("OPENAI_API_KEY")
     )
@@ -128,11 +143,7 @@ async def summarize_text(text):
     )
     # print(f'Response: {response}')
     summary = response.choices[0].message.content
-    return summary
-
-@app.post("/summary_text")
-async def summary_text(request: TextSummaryRequest):
-    summary = await summarize_text(request.text)
+    print(f'Summary: {summary}')
     return JSONResponse(content={
         "text_summary": summary
     }, status_code=200)
