@@ -7,7 +7,8 @@ import requests
 import uvicorn
 from typing import List
 import logging
-
+from openai import OpenAI
+import os
 
 app = FastAPI()
 
@@ -21,6 +22,10 @@ app.add_middleware(
 )
 
 # Define a Pydantic model to handle the expected request body
+
+class summary_text(BaseModel):
+    text: str
+
 class ImageCheckRequest(BaseModel):
     imageUrls: List[str]
 
@@ -79,7 +84,6 @@ async def check_images(request: ImageCheckRequest):
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-
 async def check_audio(url):
     try:
         # get the audio result from gpu:
@@ -109,6 +113,29 @@ async def check_audios(request: ImageCheckRequest):
         }, status_code=200)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
+
+async def summarize_text(text):
+    client = OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY")
+    )
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{
+            "role": "user", 
+            "content": f"This is a news about America politics: {text}\n Please summarize this article and return it as an array of strings. The length of array should less than 5."}
+        ],
+    )
+    # print(f'Response: {response}')
+    summary = response.choices[0].message.content
+    return summary
+
+@app.post("/summary_text")
+async def summary_text(request: TextSummaryRequest):
+    summary = await summarize_text(request.text)
+    return JSONResponse(content={
+        "text_summary": summary
+    }, status_code=200)
 
 @app.post("/check")
 async def check_image(request: ImageCheckRequest):
