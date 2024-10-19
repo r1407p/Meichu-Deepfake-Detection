@@ -2,9 +2,13 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import random
 import requests
 import uvicorn
 from typing import List
+import logging
+
+
 app = FastAPI()
 
 # Add CORS middleware to handle OPTIONS requests
@@ -20,6 +24,57 @@ app.add_middleware(
 class ImageCheckRequest(BaseModel):
     imageUrls: List[str]
     videoUrls: List[str]
+    
+class ImageCheckRequest(BaseModel):
+    imageUrls: List[str]
+
+async def check_image(url):
+    try:
+        # get the image result from gpu:
+        result = random.random()
+        return result
+    except Exception as e:
+        logging.error(f"Failed to check image: {str(e)}")
+        return 0
+    
+@app.post("/check_images")
+async def check_images(request: ImageCheckRequest):
+    try:
+        print(request.imageUrls)
+        res = []
+        distribution = {
+            "ai": 0,
+            "likely-ai": 0,
+            "non-ai": 0
+        }
+        for url in request.imageUrls:
+            try:
+                ai_probability = await check_image(url)
+                if ai_probability > 0.5:
+                    distribution["ai"] += 1
+                    res.append({"isAIgenerated": True})
+                elif ai_probability > 0.3:
+                    distribution["likely-ai"] += 1
+                    res.append({"isAIgenerated": False})
+                else:
+                    distribution["non-ai"] += 1
+                    res.append({"isAIgenerated": False})
+
+            except Exception as e:
+                logging.error(f"Failed to check image: {str(e)}")
+                res.append({"isAIgenerated": False})
+        ai_distribution = {
+            "ai": distribution["ai"] / len(request.imageUrls),
+            "likely-ai": distribution["likely-ai"] / len(request.imageUrls),
+            "non-ai": distribution["non-ai"] / len(request.imageUrls)
+        } 
+        return JSONResponse(content={
+            "image_ai": res,
+            "distribution": ai_distribution
+        }, status_code=200)
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
 
 @app.post("/check")
 async def check_image(request: ImageCheckRequest):
