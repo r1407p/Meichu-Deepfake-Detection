@@ -1,18 +1,24 @@
+// popup.js
+chrome.storage.local.get('analysisData', (data) => {
+    const histogramContainer = document.getElementById('histogramData');
+    const donutContainer = document.getElementById('donutData');
+    const analysisData = data.analysisData;
 
-// get the image analysis data from local storage
-chrome.storage.local.get('imageAnalysisData', (data) => {
-    console.log('Analysis data received in popup:', data);
-    const resultContainer = document.getElementById('resultContainer');
-    const imageAnalysisData = data.imageAnalysisData;
+    if (analysisData) {
+        if (analysisData.histogramData) {
+            histogramContainer.innerHTML = `Histogram Data: ${analysisData.histogramData.join(', ')}`;
+        } else {
+            histogramContainer.textContent = 'No histogram data found.';
+        }
 
-    if (imageAnalysisData && imageAnalysisData.data) {
-        resultContainer.innerHTML = '';
-        imageAnalysisData.data.forEach((result, index) => {
-            const resultItem = document.createElement('div');
-            resultItem.textContent = `Image ${index + 1}: ${result.isAIgenerated ? 'AI-generated' : 'Not AI-generated'}`;
-            resultContainer.appendChild(resultItem);
-        });
+        if (analysisData.donutData) {
+            const { aiPercentage, nonAiPercentage } = analysisData.donutData;
+            donutContainer.innerHTML = `AI Percentage: ${aiPercentage}%, Non-AI Percentage: ${nonAiPercentage}%`;
+        } else {
+            donutContainer.textContent = 'No donut chart data found.';
+        }
     } else {
-        resultContainer.textContent = 'No analysis data found.';
+        histogramContainer.textContent = 'No analysis data found.';
+        donutContainer.textContent = 'No analysis data found.';
     }
 });
