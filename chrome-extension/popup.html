@@ -5,45 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Image Detector</title>
-    <style>
-        body {
-            width: 300px;
-            padding: 10px;
-            font-family: Arial, sans-serif;
-        }
-        .chart-container {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0;
-        }
-        canvas {
-            width: 120px;
-            height: 120px;
-        }
-        .summary {
-            margin-top: 15px;
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="popup.js" defer></script>
 </head>
 <body>
-    <h2>Analysis Report</h2>
-    <div class="chart-container">
-        <canvas id="histogram1"></canvas>
-        <canvas id="histogram2"></canvas>
-        <canvas id="histogram3"></canvas>
-    </div>
-    <div class="chart-container">
-        <canvas id="donutChart"></canvas>
-    </div>
-    <div class="summary">
-        <h3>Article Summary:</h3>
-        <ul id="summary-list">
-            <li>Summary point 1</li>
-            <li>Summary point 2</li>
-            <li>Summary point 3</li>
-        </ul>
-    </div>
+    <h1>AI Image Detection Results</h1>
+    <div id="resultContainer">Loading analysis data...</div>
+
+    <script src="popup.js"></script>
 </body>
 </html>
