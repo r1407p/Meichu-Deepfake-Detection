@@ -142,10 +142,6 @@ async def summarize_text(text):
 @app.post("/summary_text")
 async def summary_text(request: TextSummaryRequest):
     text = " ".join(request.texts)
-    return JSONResponse(content={
-        "text_summary": ['1', "2", "3"]
-    }, status_code=200) 
-    return text
     print(text)
     if cache_server.check_cache(text) is None:
         client = OpenAI(
@@ -169,37 +165,6 @@ async def summary_text(request: TextSummaryRequest):
     return JSONResponse(content={
         "text_summary": summary
     }, status_code=200)
-
-@app.post("/check_all")
-async def check_all(request: ImageCheckRequest):
-    try:
-        print(request.imageUrls)
-        res = []
-        for url in request.imageUrls:
-            # response = requests.get(url)
-            if True:
-                res.append({"isAIgenerated": True})
-                continue
-                content_type = response.headers['Content-Type']
-                if content_type.startswith('image/'):
-                    res.append({"isAIgenerated": True})
-                else:
-                    res.append({"isAIgenerated": False})
-        for url in request.videoUrls:
-            print(url)
-        if True:
-            return JSONResponse(content={
-                "data":res,                                     
-                "histogramData": [30, 45, 25],
-                "donutData": {
-                "aiPercentage": 40,
-                "nonAiPercentage": 60
-            }}, status_code=200)
-
-        else:
-            return JSONResponse(content={"error": "Failed to download the image"}, status_code=400)
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=7000)
