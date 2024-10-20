@@ -12,10 +12,13 @@ import os
 import dotenv
 import image_classification.detect_by_url
 import audio_classification.detect_audio_by_url
+from api_server.cache_server import CacheServer
+
 dotenv.load_dotenv()
 print(os.getenv("OPENAI_API_KEY"))
 app = FastAPI()
 
+cache_server = CacheServer()
 # Add CORS middleware to handle OPTIONS requests
 app.add_middleware(
     CORSMiddleware,
@@ -66,7 +69,11 @@ async def check_images(request: ImageCheckRequest):
         }
         for url in request.imageUrls:
             try:
-                ai_probability = image_classification.detect_by_url.predict_image_from_url(url)
+                if cache_server.check_cache(url) is None:
+                    ai_probability = image_classification.detect_by_url.predict_image_from_url(url)
+                    cache_server.add_cache(url, ai_probability)
+                else:
+                    ai_probability = cache_server.check_cache(url)
                 if ai_probability > 0.5:
                     distribution["ai"] += 1
                     res.append({"isAIgenerated_prob": ai_probability, "isAIgenerated": True})
@@ -106,13 +113,17 @@ async def check_audios(request: AudioCheckRequest):
         res = []
         for url in request.audioUrls:
             try:
-                # ai_probability = await check_image(url)
-                ai_probability = random.random()
+                if cache_server.check_cache(url) is None:
+                    ai_probability = audio_classification.detect_audio_by_url.classify_audio_from_video(url)
+                    ai_probability = float(ai_probability)
+                    cache_server.add_cache(url, ai_probability)
+                else:
+                    ai_probability = cache_server.check_cache(url)
                 res.append(ai_probability)
 
             except Exception as e:
                 logging.error(f"Failed to check audio: {str(e)}")
-                res.append({"isAIgenerated": False})
+                res.append(0)
         if len(res) == 0:
             audio_ai_percentage = 0
         else:
@@ -131,20 +142,29 @@ async def summarize_text(text):
 @app.post("/summary_text")
 async def summary_text(request: TextSummaryRequest):
     text = " ".join(request.texts)
+    return JSONResponse(content={
+        "text_summary": ['1', "2", "3"]
+    }, status_code=200) 
+    return text
     print(text)
-    client = OpenAI(
+    if cache_server.check_cache(text) is None:
+        client = OpenAI(
         api_key=os.getenv("OPENAI_API_KEY")
-    )
+        )
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{
-            "role": "user", 
-            "content": f"This is a news about America politics: {text}\n Please summarize this article and return it as an array of strings but do not wrap then with ```. The length of array should less than 5."}
-        ],
-    )
-    # print(f'Response: {response}')
-    summary = response.choices[0].message.content
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{
+                "role": "user", 
+                "content": f"This is a news about America politics: {text}\n Please summarize this article and return it as an array of strings but do not wrap then with ```. The length of array should less than 5."}
+            ],
+        )
+        # print(f'Response: {response}')
+        summary = response.choices[0].message.content
+        cache_server.add_cache(text, summary)
+    else:
+        summary = cache_server.check_cache(text)
+        
     print(f'Summary: {summary}')
     return JSONResponse(content={
         "text_summary": summary
