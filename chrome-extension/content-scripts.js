@@ -80,7 +80,9 @@ observeNewMedia();
 // Function to check images with the API and update image elements
 async function checkImagesWithAPI(imageUrls, imgElements) {
     try {
+
         const response = await fetch(`{ip}/check_images`, {
+
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

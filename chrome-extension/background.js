@@ -1,3 +1,4 @@
+
 // background.js
 
 // Listener for messages received from the content script
@@ -37,3 +38,4 @@ function storeAnalysisData(key, data) {
         console.log(`${key} saved to local storage`);
     });
 }
+

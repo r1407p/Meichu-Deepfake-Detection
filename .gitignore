@@ -1,0 +1,6 @@
+.venv/
+__pycache__
+certfile.crt
+keyfile.key
+.env
+*.h5
