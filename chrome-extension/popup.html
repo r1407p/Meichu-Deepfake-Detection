@@ -4,21 +4,46 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
     <title>AI Image Detector</title>
 </head>
 <body>
-    <h1>AI Image Detection Results</h1>
+    <div id="container">
+        <h2 id="news-title">News Analysis Result</h2>
+        <p id="news-source">Below is the result of deepfake images and video detection</p>
 
-    <div>
-        <h2>Histogram Data</h2>
-        <div id="histogramData">Loading histogram data...</div>
-    </div>
+        <div id="analysis-results-title">
+            <h3 id="histogram-title">Figure Analysis</h3>
+            <h3>Video Analysis</h3>        
+        </div>
 
-    <div>
-        <h2>Donut Chart Data</h2>
-        <div id="donutData">Loading donut chart data...</div>
+        <div id="analysis-results">
+            <div id="histogram">
+                <div id="histogramData" class="histogram-image">Loading histogram data...</div>
+                <p id="histogram-label">loading labels...</p>
+            </div>
+            <div class="chart">
+                <p id="donutData" >Loading donut chart data...</p> 
+                <p id="fake">fake?</p>  <!-- has video -->     
+                <p id="noVideo">?</p>     <!-- no video -->     
+            </div>
+        </div>  
+
+
+        <div id="article-analysis">
+            <h3>Article Summarize</h3>
+            <ul id="articleSummary">Loading article analysis...</ul>
+        </div>
+
+        <div id="bottom-text">
+            <p>Does the information given helps you ?</p>
+            <button id="yes-button">Yes</button>
+            <button id="no-button">No</button>
+        </div>
     </div>
 
     <script src="popup.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+
 </body>
 </html>

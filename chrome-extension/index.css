@@ -1,0 +1,168 @@
+html {
+    /* height: 100%; */
+}
+
+body {
+    margin: 0;
+    /* height: 100%; */
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+    /* position: relative; */
+
+}
+
+p, h3 {
+    margin: 0;
+}
+
+#container {
+    width: 400px;
+    padding: 10px;
+    /* flex-wrap: wrap; */
+    /* background-color: rgb(248, 248, 248);     */
+}
+
+#news-title {
+    margin-top: 0%;
+    margin-bottom: 0%;
+}
+
+#news-source {
+    margin-top: 2px;
+    font-size: small;
+    color: rgb(144, 144, 144);
+}
+
+#analysis-results-title {
+    margin-top: 12px;
+    /* margin-right: 40px; */
+    display: flex;
+    flex-direction: row;;
+}
+#histogram-title {
+    width: 50%;
+    /* margin-left: 2px; */
+    margin-right: 5px;
+}
+
+#analysis-results {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: row;
+    /* background-color: #ff4141 */
+
+}
+
+#histogram {
+    width: 50%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* background-color: #ff4141 */
+}
+#histogram-label {
+    position: absolute;
+    font-size: 10px;
+    bottom: -2px;
+    left: 45px;
+    text-align: center;
+}
+
+.histogram-image {
+    margin-left: 2px;
+    margin-right: 2px;
+    padding: 6px;
+    height: 100%;
+    /* width: 50%; */
+    display: flex;
+    justify-items: center;
+    justify-content: center;
+    align-items: flex-end; /* 让条形从底部对齐 */
+    height: 120px; /* 直方图的高度 */
+    border: 1px solid rgb(209, 209, 209);
+}
+.bar {
+    width: 30px; /* 每个条形的宽度 */
+    margin-right: 5px; /* 条形之间的间距 */
+    margin-left: 5px; /* 条形之间的间距 */
+    background-color: #4CAF50; /* 条形的颜色 */
+    text-align: center;
+    color: white;
+    font-size: 12px;
+}
+
+.chart {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-items: center;
+    justify-content: center;
+    margin-left: 2px;
+    /* padding: 10px; */
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgb(209, 209, 209);
+}
+#donutData {
+    font-size: 36px;
+    font-weight: 700;
+    text-align: center;
+    color: orange;
+}
+#fake {
+    color: orange;
+    font-size: 20px;
+}
+#noVideo {
+    font-size: 12px;
+    text-align: center;
+    /* color: orange; */
+    /* font-size: 20px; */
+}
+
+#articleSummary {
+    margin-top: 8px;
+    margin-bottom: 10px;
+    padding-left: 16px;
+}
+
+#bottom-text {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 10px;   
+}
+
+#yes-button {
+    background-color: #0778E9;
+    color: white;
+    text-align: center;
+    margin-left: 10px;
+    margin-right: 4px;
+    cursor: pointer;
+    border-radius: 2px;
+    border: none;
+}
+
+#no-button {
+    background-color: #ffffff;
+    color: #0778E9;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 2px;
+    border: 1px solid #0778E9;
+    /* border: none; */
+}
+
+.ai-label {
+    position: absolute;
+    background-color: red;
+    color: white;
+    padding: 2px 5px;
+    font-size: 10px;
+    font-weight: bold;
+    top: 0;
+    right: 0;
+    z-index: 9999;
+}
