@@ -10,6 +10,8 @@ import logging
 from openai import OpenAI
 import os
 import dotenv
+import image_classification.detect_by_url
+import audio_classification.detect_audio_by_url
 dotenv.load_dotenv()
 print(os.getenv("OPENAI_API_KEY"))
 app = FastAPI()
@@ -37,6 +39,11 @@ class AudioCheckRequest(BaseModel):
 class TextSummaryRequest(BaseModel):
     texts: List[str]
     
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the AI Ethics API!"}
+
+    
     
 async def check_image(url):
     try:
@@ -59,8 +66,7 @@ async def check_images(request: ImageCheckRequest):
         }
         for url in request.imageUrls:
             try:
-                ai_probability = await check_image(url)
-                ai_probability = random.random()
+                ai_probability = image_classification.detect_by_url.predict_image_from_url(url)
                 if ai_probability > 0.5:
                     distribution["ai"] += 1
                     res.append({"isAIgenerated_prob": ai_probability, "isAIgenerated": True})
@@ -75,14 +81,9 @@ async def check_images(request: ImageCheckRequest):
                 logging.error(f"Failed to check image: {str(e)}")
                 res.append({"isAIgenerated_prob": 0, "isAIgenerated": False})
 
-        ai_distribution = {
-            "ai": distribution["ai"] / len(request.imageUrls),
-            "likely-ai": distribution["likely-ai"] / len(request.imageUrls),
-            "non-ai": distribution["non-ai"] / len(request.imageUrls)
-        } 
         return JSONResponse(content={
             "image_ai": res,
-            "distribution": ai_distribution
+            "distribution": distribution
         }, status_code=200)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
@@ -90,7 +91,9 @@ async def check_images(request: ImageCheckRequest):
 async def check_audio(url):
     try:
         # get the audio result from gpu:
-        result = random.random()
+        # result = random.random()
+        result = audio_classification.detect_audio_by_url.classify_audio_from_video(url)
+        print(result)
         return result
     except Exception as e:
         logging.error(f"Failed to check audio: {str(e)}")
@@ -128,7 +131,6 @@ async def summarize_text(text):
 @app.post("/summary_text")
 async def summary_text(request: TextSummaryRequest):
     text = " ".join(request.texts)
-    return text
     print(text)
     client = OpenAI(
         api_key=os.getenv("OPENAI_API_KEY")
@@ -138,7 +140,7 @@ async def summary_text(request: TextSummaryRequest):
         model="gpt-4o-mini",
         messages=[{
             "role": "user", 
-            "content": f"This is a news about America politics: {text}\n Please summarize this article and return it as an array of strings. The length of array should less than 5."}
+            "content": f"This is a news about America politics: {text}\n Please summarize this article and return it as an array of strings but do not wrap then with ```. The length of array should less than 5."}
         ],
     )
     # print(f'Response: {response}')
@@ -148,8 +150,8 @@ async def summary_text(request: TextSummaryRequest):
         "text_summary": summary
     }, status_code=200)
 
-@app.post("/check")
-async def check_image(request: ImageCheckRequest):
+@app.post("/check_all")
+async def check_all(request: ImageCheckRequest):
     try:
         print(request.imageUrls)
         res = []
