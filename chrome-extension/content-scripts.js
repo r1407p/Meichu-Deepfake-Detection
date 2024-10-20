@@ -1,8 +1,8 @@
 console.log("Content script loaded");
 
 // Set the minimum width and height for images to be checked
-const minWidth = 200;
-const minHeight = 200;
+const minWidth = 100;
+const minHeight = 100;
 
 // Function to check all existing media on the page
 function checkAllMedia() {
@@ -13,7 +13,7 @@ function checkAllMedia() {
     console.log(`Found ${images.length} images, ${videos.length} videos, and ${textNodes.length} text nodes on the page.`);
 
     // Collect image URLs that meet the size criteria
-    const imageElements = Array.from(images).filter(img => img.naturalWidth > minWidth && img.naturalHeight > minHeight);
+    const imageElements = Array.from(images).filter(img => img.width > minWidth && img.height > minHeight);
     const imageUrls = imageElements.map(img => img.src);
     console.log(`Checking image URLs: ${imageUrls}`);
 
@@ -59,7 +59,7 @@ function observeNewMedia() {
                 }
                 if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
                     newTextContents.push(node.textContent.trim());
-                    console.log(`New text found: ${node.textContent.trim()}`);
+                    // console.log(`New text found: ${node.textContent.trim()}`);
                 }
             });
         });
@@ -80,7 +80,7 @@ observeNewMedia();
 // Function to check images with the API and update image elements
 async function checkImagesWithAPI(imageUrls, imgElements) {
     try {
-        const response = await fetch(`https://103.156.185.2:7000/check_images`, {
+        const response = await fetch(`{ip}/check_images`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -94,8 +94,43 @@ async function checkImagesWithAPI(imageUrls, imgElements) {
         // Loop through the response and update image elements
         imgElements.forEach((imgElement, index) => {
             if (result.image_ai[index] && result.image_ai[index].isAIgenerated) {
+                const originalClass = imgElement.className;
+                const originalStyle = imgElement.getAttribute('style') || '';
+
+                // Create a container to wrap the image
+                const container = document.createElement('div');
+                container.style.position = 'relative';
+                container.style.boxSizing = 'border-box';
+                container.className = originalClass;
+
+                imgElement.parentElement.insertBefore(container, imgElement);
+                container.appendChild(imgElement);
+
+                // Set image styles
+                imgElement.classList.remove('w-1/3');
+                // imgElement.style.width = '100%';
+                imgElement.style.height = '100%';
                 imgElement.style.border = '2px solid red';
+                imgElement.style.padding = '4px';
                 imgElement.title = 'This image is AI-generated';
+                imgElement.style.objectFit = 'cover';
+                imgElement.style.boxSizing = 'border-box';
+
+                // Create a label for the image
+                const label = document.createElement('span');
+                label.textContent = `fake: ${result.image_ai[index].isAIgenerated_prob.toFixed(4)*100} %`;  ///
+                label.style.position = 'absolute';
+                label.style.backgroundColor = 'red';
+                label.style.color = 'white';
+                label.style.padding = '2px 5px';
+                label.style.fontSize = '10px';
+                label.style.fontWeight = 'bold';
+                label.style.top = '5px';
+                label.style.right = '5px';
+                label.style.zIndex = '9999';
+
+                // Append the label to the container
+                container.appendChild(label);
             }
         });
 
@@ -120,7 +155,7 @@ async function checkVideosWithAPI(videoUrls) {
         });
 
         const result = await response.json();
-        console.log('Video analysis result:', result);
+        // console.log('Video analysis result:', result);
 
         chrome.storage.local.set({ videoAnalysisData: result }, () => {
             console.log('Video analysis data saved to local storage from content script:', result);
@@ -144,10 +179,10 @@ async function checkTextWithAPI(textContents) {
         });
 
         const result = await response.json();
-        console.log('Text analysis result:', result);
+        // console.log('Text analysis result:', result);
 
         chrome.storage.local.set({ textAnalysisData: result }, () => {
-            console.log('Text analysis data saved to local storage from content script:', result);
+            // console.log('Text analysis data saved to local storage from content script:', result);
         });
 
     } catch (error) {
